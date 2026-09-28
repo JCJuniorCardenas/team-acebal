@@ -8,6 +8,18 @@ const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const corsOrigins = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (corsOrigins.length === 0) {
+    logger.warn(
+      'CORS_ORIGIN no está configurado: se aceptará cualquier origen. Definilo en producción.',
+    );
+  }
+  app.enableCors({ origin: corsOrigins.length > 0 ? corsOrigins : true });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

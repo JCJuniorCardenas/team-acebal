@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0e0f12;
+  --bg-alt: #16181d;
+  --bg-raised: #1c1f26;
+  --text: #f4f5f7;
+  --text-muted: #9297a3;
+  --accent: #d62828;
+  --accent-soft: rgba(214, 40, 40, 0.14);
+  --accent-glow: rgba(214, 40, 40, 0.35);
+  --border: #262a33;
+  --success: #34d399;
+  --font-display: 'Bebas Neue', Impact, sans-serif;
+  --font-functional: 'Inter', Arial, sans-serif;
+}
