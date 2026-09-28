@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,11 +12,22 @@ import { PagosModule } from './pagos/pagos.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: process.env.NODE_ENV === 'test' ? ':memory:' : 'db.sqlite',
-      autoLoadEntities: true,
-      synchronize: true, // Solo para desarrollo
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        url: config.get<string>('DATABASE_URL'),
+        host: config.get<string>('DB_HOST', 'localhost'),
+        port: config.get<number>('DB_PORT', 5432),
+        username: config.get<string>('DB_USERNAME', 'postgres'),
+        password: config.get<string>('DB_PASSWORD', 'postgres'),
+        database: config.get<string>('DB_NAME', 'team_acebal'),
+        autoLoadEntities: true,
+        synchronize: false, // El esquema se maneja siempre por migraciones
+        ssl: config.get<string>('DATABASE_URL')
+          ? { rejectUnauthorized: false }
+          : false,
+      }),
     }),
     AuthModule,
     AlumnosModule,

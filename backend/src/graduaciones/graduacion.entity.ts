@@ -28,6 +28,9 @@ export class Graduacion {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => Alumno, (alumno) => alumno.graduaciones)
+  @ManyToOne(() => Alumno, (alumno) => alumno.graduaciones, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   alumno!: Alumno;
 }

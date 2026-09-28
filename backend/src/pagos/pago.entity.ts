@@ -13,7 +13,7 @@ export class Pago {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ type: 'numeric', precision: 10, scale: 2 })
   montoPagado!: number;
 
   @Column({ type: 'date' })
@@ -28,6 +28,9 @@ export class Pago {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => Alumno, (alumno) => alumno.pagos)
+  @ManyToOne(() => Alumno, (alumno) => alumno.pagos, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   alumno!: Alumno;
 }
