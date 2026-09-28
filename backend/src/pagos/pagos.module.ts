@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AlumnosModule } from '../alumnos/alumnos.module';
 import { Pago } from './pago.entity';
+import { PagosController } from './pagos.controller';
+import { PagosService } from './pagos.service';
 
-// Módulo esqueleto: por ahora solo registra la entidad para que las
-// relaciones de Alumno resuelvan. El CRUD de Pagos se implementa en el
-// siguiente paso del roadmap.
 @Module({
-  imports: [TypeOrmModule.forFeature([Pago])],
+  imports: [TypeOrmModule.forFeature([Pago]), AlumnosModule],
+  controllers: [PagosController],
+  providers: [PagosService],
 })
 export class PagosModule {}
