@@ -20,6 +20,7 @@ export function AdminLayout() {
         <Button variant="text" onClick={logout}>Cerrar sesión</Button>
       </header>
       <nav className="admin-nav" aria-label="Administración">
+        <NavLink to="/dashboard">Dashboard</NavLink>
         <NavLink to="/alumnos">Alumnos</NavLink>
       </nav>
       <main className="admin-content">

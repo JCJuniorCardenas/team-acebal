@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlumnosModule } from './alumnos/alumnos.module';
 import { AuthModule } from './auth/auth.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { GraduacionesModule } from './graduaciones/graduaciones.module';
 import { PagosModule } from './pagos/pagos.module';
 
@@ -33,6 +34,7 @@ import { PagosModule } from './pagos/pagos.module';
     AlumnosModule,
     PagosModule,
     GraduacionesModule,
+    DashboardModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

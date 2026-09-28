@@ -3,6 +3,7 @@ import { AdminLayout } from './components/AdminLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AlumnoDetail } from './pages/AlumnoDetail'
 import { AlumnosList } from './pages/AlumnosList'
+import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
 import './styles/tokens.css'
 import './App.css'
@@ -14,7 +15,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
-            <Route index element={<Navigate to="/alumnos" replace />} />
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="alumnos" element={<AlumnosList />} />
             <Route path="alumnos/:id" element={<AlumnoDetail />} />
           </Route>

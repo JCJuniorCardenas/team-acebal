@@ -46,6 +46,8 @@ async function request(path, options = {}, requiresAuth = true) {
 export const api = {
   login: (credentials) => request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }, false),
 
+  getDashboard: () => request('/dashboard/resumen'),
+
   getAlumnos: () => request('/alumnos'),
   getAlumno: (id) => request(`/alumnos/${id}`),
   crearAlumno: (data) => request('/alumnos', { method: 'POST', body: JSON.stringify(data) }),

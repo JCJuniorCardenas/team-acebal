@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AlumnosService } from '../alumnos/alumnos.service';
+import { toDateString } from '../common/date.util';
 import { CreatePagoDto } from './dto/create-pago.dto';
 import { UpdatePagoDto } from './dto/update-pago.dto';
 import { Pago } from './pago.entity';
@@ -60,11 +61,10 @@ export class PagosService {
 
   async update(id: number, updatePagoDto: UpdatePagoDto): Promise<Pago> {
     const pago = await this.findOne(id);
-    const fechaPago =
-      updatePagoDto.fechaPago ?? this.toDateString(pago.fechaPago);
+    const fechaPago = updatePagoDto.fechaPago ?? toDateString(pago.fechaPago);
     const proximaFechaVencimiento =
       updatePagoDto.proximaFechaVencimiento ??
-      this.toDateString(pago.proximaFechaVencimiento);
+      toDateString(pago.proximaFechaVencimiento);
     this.validarFechas(fechaPago, proximaFechaVencimiento);
     Object.assign(pago, updatePagoDto);
     return this.pagosRepository.save(pago);
@@ -75,9 +75,5 @@ export class PagosService {
     if (!result.affected) {
       throw new NotFoundException(`No se encontró el pago ${id}`);
     }
-  }
-
-  private toDateString(date: Date): string {
-    return date instanceof Date ? date.toISOString().slice(0, 10) : date;
   }
 }

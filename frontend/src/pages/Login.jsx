@@ -12,7 +12,7 @@ export function Login() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (hasValidToken()) navigate('/alumnos', { replace: true })
+    if (hasValidToken()) navigate('/dashboard', { replace: true })
   }, [navigate])
 
   async function handleSubmit(event) {
@@ -25,7 +25,7 @@ export function Login() {
         password: form.password.trim(),
       })
       localStorage.setItem(TOKEN_KEY, token)
-      navigate(location.state?.from?.pathname || '/alumnos', { replace: true })
+      navigate(location.state?.from?.pathname || '/dashboard', { replace: true })
     } catch (err) {
       setError(err.message === 'No se pudo completar la solicitud.' ? 'Email o contraseña incorrectos' : err.message)
     } finally {
