@@ -3,8 +3,9 @@ import { Link, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { api } from '../services/api'
+import { agregarUnMes, calcularEdad } from '../utils/date'
 
-const emptyPago = { montoPagado: '', fechaPago: '', proximaFechaVencimiento: '' }
+const emptyPago = { montoPagado: '', fechaPago: '' }
 const emptyGraduacion = { grado: '', stripe: '', fechaGraduacion: '' }
 
 export function AlumnoDetail() {
@@ -81,7 +82,7 @@ export function AlumnoDetail() {
       await api.crearPago(id, {
         montoPagado: Number(pagoForm.montoPagado),
         fechaPago: pagoForm.fechaPago,
-        proximaFechaVencimiento: pagoForm.proximaFechaVencimiento,
+        proximaFechaVencimiento: agregarUnMes(pagoForm.fechaPago),
       })
       setPagoForm(emptyPago)
       setShowPagoForm(false)
@@ -109,7 +110,6 @@ export function AlumnoDetail() {
     setEditPagoForm({
       montoPagado: pago.montoPagado,
       fechaPago: pago.fechaPago,
-      proximaFechaVencimiento: pago.proximaFechaVencimiento,
     })
   }
 
@@ -121,7 +121,7 @@ export function AlumnoDetail() {
       await api.actualizarPago(editingPagoId, {
         montoPagado: Number(editPagoForm.montoPagado),
         fechaPago: editPagoForm.fechaPago,
-        proximaFechaVencimiento: editPagoForm.proximaFechaVencimiento,
+        proximaFechaVencimiento: agregarUnMes(editPagoForm.fechaPago),
       })
       setEditingPagoId(null)
       await load()
@@ -201,7 +201,7 @@ export function AlumnoDetail() {
         <div>
           <p className="section-kicker">Alumno</p>
           <h1>{alumno.nombre} {alumno.apellido}</h1>
-          <small className="muted">{alumno.telefono || 'Sin teléfono'}{alumno.fechaNacimiento ? ` · nació el ${alumno.fechaNacimiento}` : ''}</small>
+          <small className="muted">{alumno.telefono || 'Sin teléfono'}{alumno.fechaNacimiento ? ` · ${calcularEdad(alumno.fechaNacimiento)} años` : ''}</small>
         </div>
         {!editing && <Button variant="text" onClick={startEditing}>Editar</Button>}
       </div>
@@ -235,8 +235,8 @@ export function AlumnoDetail() {
             <div className="form-row">
               <Input id="montoPagado" label="Monto" type="number" min="0.01" step="0.01" value={pagoForm.montoPagado} onChange={(e) => setPagoForm({ ...pagoForm, montoPagado: e.target.value })} required />
               <Input id="fechaPago" label="Fecha de pago" type="date" value={pagoForm.fechaPago} onChange={(e) => setPagoForm({ ...pagoForm, fechaPago: e.target.value })} required />
-              <Input id="proximaFechaVencimiento" label="Próximo vencimiento" type="date" value={pagoForm.proximaFechaVencimiento} onChange={(e) => setPagoForm({ ...pagoForm, proximaFechaVencimiento: e.target.value })} required />
             </div>
+            <p className="field-hint">Vence automáticamente un mes después de la fecha de pago.</p>
             <div className="form-actions">
               <Button type="submit" disabled={savingPago}>{savingPago ? 'Guardando…' : 'Registrar pago'}</Button>
             </div>
@@ -252,8 +252,8 @@ export function AlumnoDetail() {
                   <div className="form-row">
                     <Input id={`edit-monto-${pago.id}`} label="Monto" type="number" min="0.01" step="0.01" value={editPagoForm.montoPagado} onChange={(e) => setEditPagoForm({ ...editPagoForm, montoPagado: e.target.value })} required />
                     <Input id={`edit-fechaPago-${pago.id}`} label="Fecha de pago" type="date" value={editPagoForm.fechaPago} onChange={(e) => setEditPagoForm({ ...editPagoForm, fechaPago: e.target.value })} required />
-                    <Input id={`edit-vencimiento-${pago.id}`} label="Próximo vencimiento" type="date" value={editPagoForm.proximaFechaVencimiento} onChange={(e) => setEditPagoForm({ ...editPagoForm, proximaFechaVencimiento: e.target.value })} required />
                   </div>
+                  <p className="field-hint">Vence automáticamente un mes después de la fecha de pago.</p>
                   <div className="form-actions">
                     <Button variant="text" type="button" onClick={() => setEditingPagoId(null)}>Cancelar</Button>
                     <Button type="submit" disabled={savingPago}>{savingPago ? 'Guardando…' : 'Guardar cambios'}</Button>
@@ -285,8 +285,8 @@ export function AlumnoDetail() {
           <form className="inline-form" onSubmit={submitGraduacion}>
             <div className="form-row">
               <Input id="grado" label="Grado" value={graduacionForm.grado} onChange={(e) => setGraduacionForm({ ...graduacionForm, grado: e.target.value })} required />
-              <Input id="stripe" label="Franja (opcional)" value={graduacionForm.stripe} onChange={(e) => setGraduacionForm({ ...graduacionForm, stripe: e.target.value })} />
-              <Input id="fechaGraduacion" label="Fecha" type="date" value={graduacionForm.fechaGraduacion} onChange={(e) => setGraduacionForm({ ...graduacionForm, fechaGraduacion: e.target.value })} required />
+              <Input id="stripe" label="Cinturón (opcional)" value={graduacionForm.stripe} onChange={(e) => setGraduacionForm({ ...graduacionForm, stripe: e.target.value })} />
+              <Input id="fechaGraduacion" label="Fecha de graduación" type="date" value={graduacionForm.fechaGraduacion} onChange={(e) => setGraduacionForm({ ...graduacionForm, fechaGraduacion: e.target.value })} required />
             </div>
             <div className="form-actions">
               <Button type="submit" disabled={savingGraduacion}>{savingGraduacion ? 'Guardando…' : 'Registrar graduación'}</Button>
@@ -302,8 +302,8 @@ export function AlumnoDetail() {
                 <form className="inline-form" onSubmit={submitEditGraduacion} key={graduacion.id}>
                   <div className="form-row">
                     <Input id={`edit-grado-${graduacion.id}`} label="Grado" value={editGraduacionForm.grado} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, grado: e.target.value })} required />
-                    <Input id={`edit-stripe-${graduacion.id}`} label="Franja (opcional)" value={editGraduacionForm.stripe} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, stripe: e.target.value })} />
-                    <Input id={`edit-fechaGrad-${graduacion.id}`} label="Fecha" type="date" value={editGraduacionForm.fechaGraduacion} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, fechaGraduacion: e.target.value })} required />
+                    <Input id={`edit-stripe-${graduacion.id}`} label="Cinturón (opcional)" value={editGraduacionForm.stripe} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, stripe: e.target.value })} />
+                    <Input id={`edit-fechaGrad-${graduacion.id}`} label="Fecha de graduación" type="date" value={editGraduacionForm.fechaGraduacion} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, fechaGraduacion: e.target.value })} required />
                   </div>
                   <div className="form-actions">
                     <Button variant="text" type="button" onClick={() => setEditingGraduacionId(null)}>Cancelar</Button>
