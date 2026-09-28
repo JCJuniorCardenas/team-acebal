@@ -14,7 +14,7 @@ import { PagosModule } from './pagos/pagos.module';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'db.sqlite',
+      database: process.env.NODE_ENV === 'test' ? ':memory:' : 'db.sqlite',
       autoLoadEntities: true,
       synchronize: true, // Solo para desarrollo
     }),
