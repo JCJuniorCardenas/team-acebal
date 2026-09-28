@@ -20,10 +20,14 @@ export function AlumnoDetail() {
   const [showPagoForm, setShowPagoForm] = useState(false)
   const [pagoForm, setPagoForm] = useState(emptyPago)
   const [savingPago, setSavingPago] = useState(false)
+  const [editingPagoId, setEditingPagoId] = useState(null)
+  const [editPagoForm, setEditPagoForm] = useState(emptyPago)
 
   const [showGraduacionForm, setShowGraduacionForm] = useState(false)
   const [graduacionForm, setGraduacionForm] = useState(emptyGraduacion)
   const [savingGraduacion, setSavingGraduacion] = useState(false)
+  const [editingGraduacionId, setEditingGraduacionId] = useState(null)
+  const [editGraduacionForm, setEditGraduacionForm] = useState(emptyGraduacion)
 
   async function load() {
     setError('')
@@ -100,6 +104,34 @@ export function AlumnoDetail() {
     }
   }
 
+  function startEditPago(pago) {
+    setEditingPagoId(pago.id)
+    setEditPagoForm({
+      montoPagado: pago.montoPagado,
+      fechaPago: pago.fechaPago,
+      proximaFechaVencimiento: pago.proximaFechaVencimiento,
+    })
+  }
+
+  async function submitEditPago(event) {
+    event.preventDefault()
+    setSavingPago(true)
+    setError('')
+    try {
+      await api.actualizarPago(editingPagoId, {
+        montoPagado: Number(editPagoForm.montoPagado),
+        fechaPago: editPagoForm.fechaPago,
+        proximaFechaVencimiento: editPagoForm.proximaFechaVencimiento,
+      })
+      setEditingPagoId(null)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingPago(false)
+    }
+  }
+
   async function submitGraduacion(event) {
     event.preventDefault()
     setSavingGraduacion(true)
@@ -128,6 +160,34 @@ export function AlumnoDetail() {
       await load()
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  function startEditGraduacion(graduacion) {
+    setEditingGraduacionId(graduacion.id)
+    setEditGraduacionForm({
+      grado: graduacion.grado,
+      stripe: graduacion.stripe || '',
+      fechaGraduacion: graduacion.fechaGraduacion,
+    })
+  }
+
+  async function submitEditGraduacion(event) {
+    event.preventDefault()
+    setSavingGraduacion(true)
+    setError('')
+    try {
+      await api.actualizarGraduacion(editingGraduacionId, {
+        grado: editGraduacionForm.grado.trim(),
+        stripe: editGraduacionForm.stripe.trim() || undefined,
+        fechaGraduacion: editGraduacionForm.fechaGraduacion,
+      })
+      setEditingGraduacionId(null)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingGraduacion(false)
     }
   }
 
@@ -187,13 +247,30 @@ export function AlumnoDetail() {
         ) : (
           <div className="admin-list">
             {alumno.pagos?.map((pago) => (
-              <article className="admin-list-item" key={pago.id}>
-                <div className="list-item-info">
-                  <strong>${Number(pago.montoPagado).toLocaleString('es-AR')}</strong>
-                  <span>Pagado el {pago.fechaPago} · vence el {pago.proximaFechaVencimiento}</span>
-                </div>
-                <Button variant="text" onClick={() => removePago(pago)}>Eliminar</Button>
-              </article>
+              editingPagoId === pago.id ? (
+                <form className="inline-form" onSubmit={submitEditPago} key={pago.id}>
+                  <div className="form-row">
+                    <Input id={`edit-monto-${pago.id}`} label="Monto" type="number" min="0.01" step="0.01" value={editPagoForm.montoPagado} onChange={(e) => setEditPagoForm({ ...editPagoForm, montoPagado: e.target.value })} required />
+                    <Input id={`edit-fechaPago-${pago.id}`} label="Fecha de pago" type="date" value={editPagoForm.fechaPago} onChange={(e) => setEditPagoForm({ ...editPagoForm, fechaPago: e.target.value })} required />
+                    <Input id={`edit-vencimiento-${pago.id}`} label="Próximo vencimiento" type="date" value={editPagoForm.proximaFechaVencimiento} onChange={(e) => setEditPagoForm({ ...editPagoForm, proximaFechaVencimiento: e.target.value })} required />
+                  </div>
+                  <div className="form-actions">
+                    <Button variant="text" type="button" onClick={() => setEditingPagoId(null)}>Cancelar</Button>
+                    <Button type="submit" disabled={savingPago}>{savingPago ? 'Guardando…' : 'Guardar cambios'}</Button>
+                  </div>
+                </form>
+              ) : (
+                <article className="admin-list-item" key={pago.id}>
+                  <div className="list-item-info">
+                    <strong>${Number(pago.montoPagado).toLocaleString('es-AR')}</strong>
+                    <span>Pagado el {pago.fechaPago} · vence el {pago.proximaFechaVencimiento}</span>
+                  </div>
+                  <div className="item-actions">
+                    <Button variant="text" onClick={() => startEditPago(pago)}>Editar</Button>
+                    <Button variant="text" onClick={() => removePago(pago)}>Eliminar</Button>
+                  </div>
+                </article>
+              )
             ))}
           </div>
         )}
@@ -221,13 +298,30 @@ export function AlumnoDetail() {
         ) : (
           <div className="admin-list">
             {alumno.graduaciones?.map((graduacion) => (
-              <article className="admin-list-item" key={graduacion.id}>
-                <div className="list-item-info">
-                  <strong>{graduacion.grado}</strong>
-                  <span>{graduacion.stripe ? `${graduacion.stripe} · ` : ''}{graduacion.fechaGraduacion}</span>
-                </div>
-                <Button variant="text" onClick={() => removeGraduacion(graduacion)}>Eliminar</Button>
-              </article>
+              editingGraduacionId === graduacion.id ? (
+                <form className="inline-form" onSubmit={submitEditGraduacion} key={graduacion.id}>
+                  <div className="form-row">
+                    <Input id={`edit-grado-${graduacion.id}`} label="Grado" value={editGraduacionForm.grado} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, grado: e.target.value })} required />
+                    <Input id={`edit-stripe-${graduacion.id}`} label="Franja (opcional)" value={editGraduacionForm.stripe} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, stripe: e.target.value })} />
+                    <Input id={`edit-fechaGrad-${graduacion.id}`} label="Fecha" type="date" value={editGraduacionForm.fechaGraduacion} onChange={(e) => setEditGraduacionForm({ ...editGraduacionForm, fechaGraduacion: e.target.value })} required />
+                  </div>
+                  <div className="form-actions">
+                    <Button variant="text" type="button" onClick={() => setEditingGraduacionId(null)}>Cancelar</Button>
+                    <Button type="submit" disabled={savingGraduacion}>{savingGraduacion ? 'Guardando…' : 'Guardar cambios'}</Button>
+                  </div>
+                </form>
+              ) : (
+                <article className="admin-list-item" key={graduacion.id}>
+                  <div className="list-item-info">
+                    <strong>{graduacion.grado}</strong>
+                    <span>{graduacion.stripe ? `${graduacion.stripe} · ` : ''}{graduacion.fechaGraduacion}</span>
+                  </div>
+                  <div className="item-actions">
+                    <Button variant="text" onClick={() => startEditGraduacion(graduacion)}>Editar</Button>
+                    <Button variant="text" onClick={() => removeGraduacion(graduacion)}>Eliminar</Button>
+                  </div>
+                </article>
+              )
             ))}
           </div>
         )}

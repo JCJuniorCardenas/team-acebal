@@ -54,10 +54,12 @@ export const api = {
 
   getPagos: (alumnoId) => request(`/alumnos/${alumnoId}/pagos`),
   crearPago: (alumnoId, data) => request(`/alumnos/${alumnoId}/pagos`, { method: 'POST', body: JSON.stringify(data) }),
+  actualizarPago: (id, data) => request(`/pagos/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   eliminarPago: (id) => request(`/pagos/${id}`, { method: 'DELETE' }),
 
   getGraduaciones: (alumnoId) => request(`/alumnos/${alumnoId}/graduaciones`),
   crearGraduacion: (alumnoId, data) => request(`/alumnos/${alumnoId}/graduaciones`, { method: 'POST', body: JSON.stringify(data) }),
+  actualizarGraduacion: (id, data) => request(`/graduaciones/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   eliminarGraduacion: (id) => request(`/graduaciones/${id}`, { method: 'DELETE' }),
 }
 
