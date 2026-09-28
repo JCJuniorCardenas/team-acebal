@@ -37,7 +37,7 @@ h2 { font: 400 1.6rem var(--font-display); letter-spacing: .02em; margin: 0; tex
 .inline-form { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1.5rem; padding: 1.25rem; }
 .form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
 .form-row .field { flex: 1; min-width: 160px; }
-.form-actions { display: flex; justify-content: flex-end; margin-top: .25rem; }
+.form-actions { align-items: center; display: flex; gap: .75rem; justify-content: flex-end; margin-top: .25rem; }
 
 /* Buttons */
 .button { border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-weight: 600; min-height: 42px; padding: .7rem 1.1rem; transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease; }

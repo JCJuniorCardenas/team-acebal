@@ -13,6 +13,10 @@ export function AlumnoDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const [editing, setEditing] = useState(false)
+  const [editForm, setEditForm] = useState(null)
+  const [savingAlumno, setSavingAlumno] = useState(false)
+
   const [showPagoForm, setShowPagoForm] = useState(false)
   const [pagoForm, setPagoForm] = useState(emptyPago)
   const [savingPago, setSavingPago] = useState(false)
@@ -34,6 +38,36 @@ export function AlumnoDetail() {
 
   // oxlint-disable-next-line react/set-state-in-effect react-hooks/exhaustive-deps
   useEffect(() => { load() }, [id])
+
+  function startEditing() {
+    setEditForm({
+      nombre: alumno.nombre,
+      apellido: alumno.apellido || '',
+      telefono: alumno.telefono || '',
+      fechaNacimiento: alumno.fechaNacimiento || '',
+    })
+    setEditing(true)
+  }
+
+  async function submitEdit(event) {
+    event.preventDefault()
+    setSavingAlumno(true)
+    setError('')
+    try {
+      await api.actualizarAlumno(id, {
+        nombre: editForm.nombre.trim(),
+        apellido: editForm.apellido.trim() || undefined,
+        telefono: editForm.telefono.trim() || undefined,
+        fechaNacimiento: editForm.fechaNacimiento || undefined,
+      })
+      setEditing(false)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingAlumno(false)
+    }
+  }
 
   async function submitPago(event) {
     event.preventDefault()
@@ -109,9 +143,27 @@ export function AlumnoDetail() {
           <h1>{alumno.nombre} {alumno.apellido}</h1>
           <small className="muted">{alumno.telefono || 'Sin teléfono'}{alumno.fechaNacimiento ? ` · nació el ${alumno.fechaNacimiento}` : ''}</small>
         </div>
+        {!editing && <Button variant="text" onClick={startEditing}>Editar</Button>}
       </div>
 
       {error && <p className="error-message" role="alert">{error}</p>}
+
+      {editing && (
+        <form className="inline-form" onSubmit={submitEdit}>
+          <div className="form-row">
+            <Input id="edit-nombre" label="Nombre" value={editForm.nombre} onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })} required />
+            <Input id="edit-apellido" label="Apellido" value={editForm.apellido} onChange={(e) => setEditForm({ ...editForm, apellido: e.target.value })} />
+          </div>
+          <div className="form-row">
+            <Input id="edit-telefono" label="Teléfono" value={editForm.telefono} onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })} />
+            <Input id="edit-fechaNacimiento" label="Fecha de nacimiento" type="date" value={editForm.fechaNacimiento} onChange={(e) => setEditForm({ ...editForm, fechaNacimiento: e.target.value })} />
+          </div>
+          <div className="form-actions">
+            <Button variant="text" type="button" onClick={() => setEditing(false)}>Cancelar</Button>
+            <Button type="submit" disabled={savingAlumno}>{savingAlumno ? 'Guardando…' : 'Guardar cambios'}</Button>
+          </div>
+        </form>
+      )}
 
       <section className="detail-block">
         <div className="content-title-row content-title-row--sub">
