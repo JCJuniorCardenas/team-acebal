@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AlumnosModule } from '../alumnos/alumnos.module';
 import { Graduacion } from './graduacion.entity';
+import { GraduacionesController } from './graduaciones.controller';
+import { GraduacionesService } from './graduaciones.service';
 
-// Módulo esqueleto: por ahora solo registra la entidad para que las
-// relaciones de Alumno resuelvan. El CRUD de Graduaciones se implementa
-// en el siguiente paso del roadmap.
 @Module({
-  imports: [TypeOrmModule.forFeature([Graduacion])],
+  imports: [TypeOrmModule.forFeature([Graduacion]), AlumnosModule],
+  controllers: [GraduacionesController],
+  providers: [GraduacionesService],
 })
 export class GraduacionesModule {}
