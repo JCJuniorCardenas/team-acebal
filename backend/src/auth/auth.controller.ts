@@ -5,6 +5,7 @@ import type { Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { ReenviarVerificacionDto } from './dto/reenviar-verificacion.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
@@ -26,6 +27,13 @@ export class AuthController {
   @Post('registro')
   registrar(@Body() dto: RegisterDto) {
     return this.authService.registrar(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Post('reenviar-verificacion')
+  reenviarVerificacion(@Body() dto: ReenviarVerificacionDto) {
+    return this.authService.reenviarVerificacion(dto.email);
   }
 
   @Public()

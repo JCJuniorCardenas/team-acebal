@@ -51,6 +51,19 @@ export class AuthService {
     };
   }
 
+  private async enviarEmailVerificacion(usuario: Usuario): Promise<void> {
+    const verificationToken = randomBytes(32).toString('hex');
+    usuario.verificationToken = verificationToken;
+    usuario.verificationTokenExpira = new Date(
+      Date.now() + VERIFICACION_HORAS_VALIDEZ * 60 * 60 * 1000,
+    );
+    await this.usuarios.save(usuario);
+
+    const backendUrl = this.config.get<string>('BACKEND_URL', 'http://localhost:3000');
+    const verificationUrl = `${backendUrl}/auth/verificar/${verificationToken}`;
+    await this.emailService.enviarVerificacion(usuario.email, verificationUrl);
+  }
+
   async registrar(dto: RegisterDto): Promise<{ message: string }> {
     const normalizedEmail = dto.email.toLowerCase();
     const existente = await this.usuarios.findOneBy({ email: normalizedEmail });
@@ -59,28 +72,30 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const verificationToken = randomBytes(32).toString('hex');
-    const verificationTokenExpira = new Date(
-      Date.now() + VERIFICACION_HORAS_VALIDEZ * 60 * 60 * 1000,
-    );
-
     const usuario = this.usuarios.create({
       nombre: dto.nombre,
       email: normalizedEmail,
       password: passwordHash,
       emailVerificado: false,
-      verificationToken,
-      verificationTokenExpira,
     });
     await this.usuarios.save(usuario);
-
-    const backendUrl = this.config.get<string>('BACKEND_URL', 'http://localhost:3000');
-    const verificationUrl = `${backendUrl}/auth/verificar/${verificationToken}`;
-    await this.emailService.enviarVerificacion(normalizedEmail, verificationUrl);
+    await this.enviarEmailVerificacion(usuario);
 
     return {
       message: 'Cuenta creada. Revisá tu email para confirmarla antes de ingresar.',
     };
+  }
+
+  async reenviarVerificacion(email: string): Promise<{ message: string }> {
+    const mensaje =
+      'Si el email corresponde a una cuenta pendiente de confirmar, te reenviamos el link de verificación.';
+    const usuario = await this.usuarios.findOneBy({
+      email: email.toLowerCase(),
+    });
+    if (usuario && !usuario.emailVerificado) {
+      await this.enviarEmailVerificacion(usuario);
+    }
+    return { message: mensaje };
   }
 
   async verificarEmail(token: string): Promise<void> {

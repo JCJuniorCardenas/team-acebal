@@ -11,6 +11,9 @@ export function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [noVerificado, setNoVerificado] = useState(false)
+  const [reenviando, setReenviando] = useState(false)
+  const [reenviado, setReenviado] = useState(false)
 
   const verificado = searchParams.get('verificado')
 
@@ -22,6 +25,8 @@ export function Login() {
     event.preventDefault()
     setLoading(true)
     setError('')
+    setNoVerificado(false)
+    setReenviado(false)
     try {
       const { access_token: token } = await api.login({
         email: form.email.trim(),
@@ -30,9 +35,25 @@ export function Login() {
       localStorage.setItem(TOKEN_KEY, token)
       navigate(location.state?.from?.pathname || '/dashboard', { replace: true })
     } catch (err) {
+      if (err.status === 401 && err.message.includes('confirmaste')) {
+        setNoVerificado(true)
+      }
       setError(err.message === 'No se pudo completar la solicitud.' ? 'Email o contraseña incorrectos' : err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function reenviarVerificacion() {
+    setReenviando(true)
+    try {
+      await api.reenviarVerificacion(form.email.trim())
+      setReenviado(true)
+    } catch {
+      // El endpoint no distingue si el email existe; cualquier error se ignora en la UI.
+      setReenviado(true)
+    } finally {
+      setReenviando(false)
     }
   }
 
@@ -71,6 +92,12 @@ export function Login() {
             required
           />
           {error && <p className="error-message" role="alert">{error}</p>}
+          {noVerificado && !reenviado && (
+            <Button type="button" variant="text" onClick={reenviarVerificacion} disabled={reenviando}>
+              {reenviando ? 'Enviando…' : 'Reenviar email de verificación'}
+            </Button>
+          )}
+          {reenviado && <p className="success-message" role="status">Listo, revisá tu email.</p>}
           <Button type="submit" disabled={loading}>{loading ? 'Ingresando…' : 'Iniciar sesión'}</Button>
         </form>
         <p className="login-intro login-anim" style={{ '--delay': '.3s', margin: '1.5rem 0 0' }}>
