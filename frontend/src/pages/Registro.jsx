@@ -36,8 +36,7 @@ export function Registro() {
         <h1 className="login-anim" style={{ '--delay': '.08s' }}>Creá tu cuenta.</h1>
         {enviado ? (
           <p className="login-intro login-anim" style={{ '--delay': '.16s' }}>
-            Listo. Te mandamos un email a <strong>{form.email.trim()}</strong> para confirmar la cuenta.
-            Revisá tu bandeja de entrada (y spam) y tocá el link antes de ingresar.
+            Listo, ya podés <Link to="/login">iniciar sesión</Link> con <strong>{form.email.trim()}</strong>.
           </p>
         ) : (
           <>

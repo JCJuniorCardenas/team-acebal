@@ -37,12 +37,10 @@ export class AuthService {
       throw new UnauthorizedException('Email o contraseña incorrectos');
     }
 
-    if (!usuario.emailVerificado) {
-      throw new UnauthorizedException(
-        'Todavía no confirmaste tu email. Revisá tu bandeja de entrada.',
-      );
-    }
-
+    // La verificación de email es informativa, no un requisito para entrar:
+    // con el remitente de prueba de Resend, el mail solo le llega al dueño
+    // de la cuenta de Resend, así que exigirla bloquearía a cualquier otra
+    // persona que se registre desde una demo pública.
     return {
       access_token: await this.jwt.signAsync({
         sub: usuario.id,
@@ -82,7 +80,7 @@ export class AuthService {
     await this.enviarEmailVerificacion(usuario);
 
     return {
-      message: 'Cuenta creada. Revisá tu email para confirmarla antes de ingresar.',
+      message: 'Cuenta creada. Ya podés ingresar.',
     };
   }
 
