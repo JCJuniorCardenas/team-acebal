@@ -17,21 +17,25 @@ function buildService() {
 
 describe('AlumnosService', () => {
   describe('create', () => {
-    it('crea y guarda un alumno', async () => {
+    it('crea y guarda un alumno asociado al usuario dueño', async () => {
       const { service, repository } = buildService();
-      const alumno = await service.create({ nombre: 'Juan' });
-      expect(repository.create).toHaveBeenCalledWith({ nombre: 'Juan' });
+      const alumno = await service.create(1, { nombre: 'Juan' });
+      expect(repository.create).toHaveBeenCalledWith({
+        nombre: 'Juan',
+        usuario: { id: 1 },
+      });
       expect(repository.save).toHaveBeenCalled();
       expect(alumno).toMatchObject({ nombre: 'Juan' });
     });
   });
 
   describe('findAll', () => {
-    it('lista ordenado por nombre', async () => {
+    it('lista ordenado por nombre, filtrado por usuario', async () => {
       const { service, repository } = buildService();
       repository.find.mockResolvedValue([]);
-      await service.findAll();
+      await service.findAll(1);
       expect(repository.find).toHaveBeenCalledWith({
+        where: { usuario: { id: 1 } },
         order: { nombre: 'ASC' },
       });
     });
@@ -42,17 +46,17 @@ describe('AlumnosService', () => {
       const { service, repository } = buildService();
       const alumno = { id: 1, nombre: 'Juan', pagos: [], graduaciones: [] };
       repository.findOne.mockResolvedValue(alumno);
-      await expect(service.findOne(1)).resolves.toEqual(alumno);
+      await expect(service.findOne(1, 1)).resolves.toEqual(alumno);
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, usuario: { id: 1 } },
         relations: { pagos: true, graduaciones: true },
       });
     });
 
-    it('lanza 404 si no existe', async () => {
+    it('lanza 404 si no existe o no le pertenece al usuario', async () => {
       const { service, repository } = buildService();
       repository.findOne.mockResolvedValue(null);
-      await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(1, 999)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -64,7 +68,7 @@ describe('AlumnosService', () => {
         nombre: 'Juan',
         apellido: 'Perez',
       });
-      const actualizado = await service.update(1, { apellido: 'Gomez' });
+      const actualizado = await service.update(1, 1, { apellido: 'Gomez' });
       expect(actualizado.apellido).toBe('Gomez');
       expect(actualizado.nombre).toBe('Juan');
     });
@@ -74,13 +78,13 @@ describe('AlumnosService', () => {
     it('elimina cuando existe', async () => {
       const { service, repository } = buildService();
       repository.delete.mockResolvedValue({ affected: 1 });
-      await expect(service.remove(1)).resolves.toBeUndefined();
+      await expect(service.remove(1, 1)).resolves.toBeUndefined();
     });
 
     it('lanza 404 si no afectó ninguna fila', async () => {
       const { service, repository } = buildService();
       repository.delete.mockResolvedValue({ affected: 0 });
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+      await expect(service.remove(1, 999)).rejects.toThrow(NotFoundException);
     });
   });
 });

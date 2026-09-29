@@ -30,8 +30,12 @@ export class PagosService {
     }
   }
 
-  async create(alumnoId: number, createPagoDto: CreatePagoDto): Promise<Pago> {
-    const alumno = await this.alumnosService.findOne(alumnoId);
+  async create(
+    usuarioId: number,
+    alumnoId: number,
+    createPagoDto: CreatePagoDto,
+  ): Promise<Pago> {
+    const alumno = await this.alumnosService.findOne(usuarioId, alumnoId);
     this.validarFechas(
       createPagoDto.fechaPago,
       createPagoDto.proximaFechaVencimiento,
@@ -40,17 +44,17 @@ export class PagosService {
     return this.pagosRepository.save(pago);
   }
 
-  async findAllByAlumno(alumnoId: number): Promise<Pago[]> {
-    await this.alumnosService.findOne(alumnoId);
+  async findAllByAlumno(usuarioId: number, alumnoId: number): Promise<Pago[]> {
+    await this.alumnosService.findOne(usuarioId, alumnoId);
     return this.pagosRepository.find({
       where: { alumno: { id: alumnoId } },
       order: { fechaPago: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<Pago> {
+  private async findOwnedPago(usuarioId: number, id: number): Promise<Pago> {
     const pago = await this.pagosRepository.findOne({
-      where: { id },
+      where: { id, alumno: { usuario: { id: usuarioId } } },
       relations: { alumno: true },
     });
     if (!pago) {
@@ -59,8 +63,16 @@ export class PagosService {
     return pago;
   }
 
-  async update(id: number, updatePagoDto: UpdatePagoDto): Promise<Pago> {
-    const pago = await this.findOne(id);
+  findOne(usuarioId: number, id: number): Promise<Pago> {
+    return this.findOwnedPago(usuarioId, id);
+  }
+
+  async update(
+    usuarioId: number,
+    id: number,
+    updatePagoDto: UpdatePagoDto,
+  ): Promise<Pago> {
+    const pago = await this.findOwnedPago(usuarioId, id);
     const fechaPago = updatePagoDto.fechaPago ?? toDateString(pago.fechaPago);
     const proximaFechaVencimiento =
       updatePagoDto.proximaFechaVencimiento ??
@@ -70,10 +82,8 @@ export class PagosService {
     return this.pagosRepository.save(pago);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.pagosRepository.delete(id);
-    if (!result.affected) {
-      throw new NotFoundException(`No se encontró el pago ${id}`);
-    }
+  async remove(usuarioId: number, id: number): Promise<void> {
+    await this.findOwnedPago(usuarioId, id);
+    await this.pagosRepository.delete(id);
   }
 }

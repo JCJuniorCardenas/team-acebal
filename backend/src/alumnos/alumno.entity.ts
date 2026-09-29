@@ -2,12 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Pago } from '../pagos/pago.entity';
 import { Graduacion } from '../graduaciones/graduacion.entity';
+import { Usuario } from '../auth/usuario.entity';
 
 @Entity()
 export class Alumno {
@@ -37,4 +39,7 @@ export class Alumno {
 
   @OneToMany(() => Graduacion, (graduacion) => graduacion.alumno)
   graduaciones!: Graduacion[];
+
+  @ManyToOne(() => Usuario, { nullable: false, onDelete: 'CASCADE' })
+  usuario!: Usuario;
 }

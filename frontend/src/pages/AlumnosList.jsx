@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import { Reveal } from '../components/Reveal'
 import { api } from '../services/api'
 
 const emptyForm = { nombre: '', apellido: '', telefono: '', fechaNacimiento: '' }
@@ -99,8 +100,8 @@ export function AlumnosList() {
         <p className="empty-state">Todavía no cargaste ningún alumno.</p>
       ) : (
         <div className="admin-list">
-          {alumnos.map((alumno) => (
-            <article className="admin-list-item" key={alumno.id}>
+          {alumnos.map((alumno, index) => (
+            <Reveal as="article" className="admin-list-item" delay={Math.min(index * 0.05, 0.4)} key={alumno.id}>
               <div className="list-item-info">
                 <Link to={`/alumnos/${alumno.id}`}><strong>{alumno.nombre} {alumno.apellido}</strong></Link>
                 <span>{alumno.telefono || 'Sin teléfono'}</span>
@@ -109,7 +110,7 @@ export function AlumnosList() {
                 <Link className="button button--text" to={`/alumnos/${alumno.id}`}>Ver</Link>
                 <Button variant="text" onClick={() => remove(alumno)}>Eliminar</Button>
               </div>
-            </article>
+            </Reveal>
           ))}
         </div>
       )}

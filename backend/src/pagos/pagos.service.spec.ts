@@ -13,7 +13,7 @@ function buildService(alumnoExiste = true) {
   };
   const alumno = { id: 1, nombre: 'Juan' };
   const alumnosService = {
-    findOne: jest.fn((id: number) => {
+    findOne: jest.fn((_usuarioId: number, id: number) => {
       if (!alumnoExiste) {
         return Promise.reject(
           new NotFoundException(`No se encontró el alumno ${id}`),
@@ -33,7 +33,7 @@ describe('PagosService', () => {
   describe('create', () => {
     it('crea un pago cuando el alumno existe y las fechas son válidas', async () => {
       const { service, repository } = buildService();
-      await service.create(1, {
+      await service.create(1, 1, {
         montoPagado: 15000,
         fechaPago: '2026-01-01',
         proximaFechaVencimiento: '2026-02-01',
@@ -44,7 +44,7 @@ describe('PagosService', () => {
     it('rechaza si el alumno no existe', async () => {
       const { service } = buildService(false);
       await expect(
-        service.create(999, {
+        service.create(1, 999, {
           montoPagado: 15000,
           fechaPago: '2026-01-01',
           proximaFechaVencimiento: '2026-02-01',
@@ -55,7 +55,7 @@ describe('PagosService', () => {
     it('rechaza si el vencimiento es anterior al pago', async () => {
       const { service } = buildService();
       await expect(
-        service.create(1, {
+        service.create(1, 1, {
           montoPagado: 15000,
           fechaPago: '2026-02-01',
           proximaFechaVencimiento: '2026-01-01',
@@ -65,7 +65,7 @@ describe('PagosService', () => {
 
     it('acepta que el vencimiento sea el mismo día que el pago', async () => {
       const { service, repository } = buildService();
-      await service.create(1, {
+      await service.create(1, 1, {
         montoPagado: 15000,
         fechaPago: '2026-01-01',
         proximaFechaVencimiento: '2026-01-01',
@@ -83,7 +83,7 @@ describe('PagosService', () => {
         proximaFechaVencimiento: new Date('2026-02-01'),
       });
       await expect(
-        service.update(1, { proximaFechaVencimiento: '2025-12-01' }),
+        service.update(1, 1, { proximaFechaVencimiento: '2025-12-01' }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -94,7 +94,7 @@ describe('PagosService', () => {
         fechaPago: new Date('2026-01-01'),
         proximaFechaVencimiento: new Date('2026-02-01'),
       });
-      const actualizado = await service.update(1, { montoPagado: 20000 });
+      const actualizado = await service.update(1, 1, { montoPagado: 20000 });
       expect(actualizado.montoPagado).toBe(20000);
     });
   });
@@ -102,7 +102,7 @@ describe('PagosService', () => {
   describe('findAllByAlumno', () => {
     it('lanza 404 si el alumno no existe', async () => {
       const { service } = buildService(false);
-      await expect(service.findAllByAlumno(999)).rejects.toThrow(
+      await expect(service.findAllByAlumno(1, 999)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -111,8 +111,8 @@ describe('PagosService', () => {
   describe('remove', () => {
     it('lanza 404 si no existe el pago', async () => {
       const { service, repository } = buildService();
-      repository.delete.mockResolvedValue({ affected: 0 });
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+      repository.findOne.mockResolvedValue(null);
+      await expect(service.remove(1, 999)).rejects.toThrow(NotFoundException);
     });
   });
 });

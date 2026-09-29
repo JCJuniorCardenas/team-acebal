@@ -46,7 +46,7 @@ export class DashboardService {
     @InjectRepository(Pago) private readonly pagosRepository: Repository<Pago>,
   ) {}
 
-  async resumen(): Promise<ResumenDashboard> {
+  async resumen(usuarioId: number): Promise<ResumenDashboard> {
     const hoy = argentinaToday();
     const limiteProximoVencimiento = addDays(
       hoy,
@@ -55,9 +55,13 @@ export class DashboardService {
     const inicioDeMes = `${hoy.slice(0, 7)}-01`;
 
     const [totalAlumnos, alumnos, pagos] = await Promise.all([
-      this.alumnosRepository.count(),
-      this.alumnosRepository.find({ order: { nombre: 'ASC' } }),
+      this.alumnosRepository.count({ where: { usuario: { id: usuarioId } } }),
+      this.alumnosRepository.find({
+        where: { usuario: { id: usuarioId } },
+        order: { nombre: 'ASC' },
+      }),
       this.pagosRepository.find({
+        where: { alumno: { usuario: { id: usuarioId } } },
         relations: { alumno: true },
         order: { fechaPago: 'DESC' },
       }),

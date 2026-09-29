@@ -5,6 +5,7 @@ import { AlumnoDetail } from './pages/AlumnoDetail'
 import { AlumnosList } from './pages/AlumnosList'
 import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
+import { Registro } from './pages/Registro'
 import './styles/tokens.css'
 import './App.css'
 
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />

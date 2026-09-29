@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { api, hasValidToken, TOKEN_KEY } from '../services/api'
@@ -7,9 +7,12 @@ import { api, hasValidToken, TOKEN_KEY } from '../services/api'
 export function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const verificado = searchParams.get('verificado')
 
   useEffect(() => {
     if (hasValidToken()) navigate('/dashboard', { replace: true })
@@ -40,6 +43,8 @@ export function Login() {
         <p className="brand-mark login-anim" style={{ '--delay': '0s' }}>ACADEMIA</p>
         <h1 className="login-anim" style={{ '--delay': '.08s' }}>Ingresá al panel.</h1>
         <p className="login-intro login-anim" style={{ '--delay': '.16s' }}>Gestioná alumnos, pagos y graduaciones.</p>
+        {verificado === '1' && <p className="success-message" role="status">Cuenta confirmada. Ya podés ingresar.</p>}
+        {verificado === '0' && <p className="error-message" role="alert">El link de verificación es inválido o expiró.</p>}
         <form onSubmit={handleSubmit} className="login-anim" style={{ '--delay': '.24s' }}>
           <Input
             id="email"
@@ -68,6 +73,9 @@ export function Login() {
           {error && <p className="error-message" role="alert">{error}</p>}
           <Button type="submit" disabled={loading}>{loading ? 'Ingresando…' : 'Iniciar sesión'}</Button>
         </form>
+        <p className="login-intro login-anim" style={{ '--delay': '.3s', margin: '1.5rem 0 0' }}>
+          <Link to="/registro">Crear una cuenta</Link>
+        </p>
       </div>
     </main>
   )
