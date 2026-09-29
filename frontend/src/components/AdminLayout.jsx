@@ -14,7 +14,7 @@ export function AdminLayout() {
     <div className="admin-shell">
       <header className="admin-header">
         <div>
-          <p className="brand-mark">TEAM ACEBAL</p>
+          <p className="brand-mark">ACADEMIA</p>
           <span className="admin-label">Administración</span>
         </div>
         <Button variant="text" onClick={logout}>Cerrar sesión</Button>

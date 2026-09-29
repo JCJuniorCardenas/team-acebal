@@ -35,11 +35,12 @@ export function Login() {
 
   return (
     <main className="login-shell">
+      <div className="login-bg" aria-hidden="true" />
       <div className="login-content">
-        <p className="brand-mark">TEAM ACEBAL</p>
-        <h1>Ingresá al panel.</h1>
-        <p className="login-intro">Gestioná alumnos, pagos y graduaciones.</p>
-        <form onSubmit={handleSubmit}>
+        <p className="brand-mark login-anim" style={{ '--delay': '0s' }}>ACADEMIA</p>
+        <h1 className="login-anim" style={{ '--delay': '.08s' }}>Ingresá al panel.</h1>
+        <p className="login-intro login-anim" style={{ '--delay': '.16s' }}>Gestioná alumnos, pagos y graduaciones.</p>
+        <form onSubmit={handleSubmit} className="login-anim" style={{ '--delay': '.24s' }}>
           <Input
             id="email"
             label="Email"
