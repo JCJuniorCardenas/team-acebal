@@ -113,9 +113,13 @@ export class AuthService {
       throw new BadRequestException('El link de verificación es inválido o expiró');
     }
 
+    // El token no se invalida acá: algunos clientes de email (ej. Gmail)
+    // escanean el link automáticamente por seguridad antes de que la persona
+    // haga clic, lo que "gastaría" un token de un solo uso y rompería la
+    // verificación real. Como esta operación es idempotente (solo pone
+    // emailVerificado en true), no hay riesgo en dejar el link reutilizable
+    // hasta que expire.
     usuario.emailVerificado = true;
-    usuario.verificationToken = null;
-    usuario.verificationTokenExpira = null;
     await this.usuarios.save(usuario);
   }
 
