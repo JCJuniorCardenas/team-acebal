@@ -15,10 +15,11 @@ export class GraduacionesService {
   ) {}
 
   async create(
+    usuarioId: number,
     alumnoId: number,
     createGraduacionDto: CreateGraduacionDto,
   ): Promise<Graduacion> {
-    const alumno = await this.alumnosService.findOne(alumnoId);
+    const alumno = await this.alumnosService.findOne(usuarioId, alumnoId);
     const graduacion = this.graduacionesRepository.create({
       ...createGraduacionDto,
       alumno,
@@ -26,17 +27,23 @@ export class GraduacionesService {
     return this.graduacionesRepository.save(graduacion);
   }
 
-  async findAllByAlumno(alumnoId: number): Promise<Graduacion[]> {
-    await this.alumnosService.findOne(alumnoId);
+  async findAllByAlumno(
+    usuarioId: number,
+    alumnoId: number,
+  ): Promise<Graduacion[]> {
+    await this.alumnosService.findOne(usuarioId, alumnoId);
     return this.graduacionesRepository.find({
       where: { alumno: { id: alumnoId } },
       order: { fechaGraduacion: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<Graduacion> {
+  private async findOwnedGraduacion(
+    usuarioId: number,
+    id: number,
+  ): Promise<Graduacion> {
     const graduacion = await this.graduacionesRepository.findOne({
-      where: { id },
+      where: { id, alumno: { usuario: { id: usuarioId } } },
       relations: { alumno: true },
     });
     if (!graduacion) {
@@ -45,19 +52,22 @@ export class GraduacionesService {
     return graduacion;
   }
 
+  findOne(usuarioId: number, id: number): Promise<Graduacion> {
+    return this.findOwnedGraduacion(usuarioId, id);
+  }
+
   async update(
+    usuarioId: number,
     id: number,
     updateGraduacionDto: UpdateGraduacionDto,
   ): Promise<Graduacion> {
-    const graduacion = await this.findOne(id);
+    const graduacion = await this.findOwnedGraduacion(usuarioId, id);
     Object.assign(graduacion, updateGraduacionDto);
     return this.graduacionesRepository.save(graduacion);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.graduacionesRepository.delete(id);
-    if (!result.affected) {
-      throw new NotFoundException(`No se encontró la graduación ${id}`);
-    }
+  async remove(usuarioId: number, id: number): Promise<void> {
+    await this.findOwnedGraduacion(usuarioId, id);
+    await this.graduacionesRepository.delete(id);
   }
 }

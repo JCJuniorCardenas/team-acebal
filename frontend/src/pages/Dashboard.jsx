@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Reveal } from '../components/Reveal'
 import { api } from '../services/api'
 
 function nombreCompleto(persona) {
@@ -40,21 +41,21 @@ export function Dashboard() {
       {error && <p className="error-message" role="alert">{error}</p>}
 
       <div className="stat-cards">
-        <article className="stat-card">
+        <Reveal as="article" className="stat-card" delay={0}>
           <span>Alumnos</span>
           <strong>{resumen.totalAlumnos}</strong>
-        </article>
-        <article className={`stat-card ${resumen.totalPagosVencidos > 0 ? 'stat-card--alert' : ''}`}>
+        </Reveal>
+        <Reveal as="article" className={`stat-card ${resumen.totalPagosVencidos > 0 ? 'stat-card--alert' : ''}`} delay={0.08}>
           <span>Cuotas vencidas</span>
           <strong>{resumen.totalPagosVencidos}</strong>
-        </article>
-        <article className="stat-card">
+        </Reveal>
+        <Reveal as="article" className="stat-card" delay={0.16}>
           <span>Recaudado este mes</span>
           <strong>${Number(resumen.recaudadoMes).toLocaleString('es-AR')}</strong>
-        </article>
+        </Reveal>
       </div>
 
-      <section className="detail-block">
+      <Reveal as="section" className="detail-block">
         <div className="content-title-row content-title-row--sub">
           <h2>Cuotas vencidas</h2>
         </div>
@@ -73,9 +74,9 @@ export function Dashboard() {
             ))}
           </div>
         )}
-      </section>
+      </Reveal>
 
-      <section className="detail-block">
+      <Reveal as="section" className="detail-block">
         <div className="content-title-row content-title-row--sub">
           <h2>Por vencer (próximos 7 días)</h2>
         </div>
@@ -94,10 +95,10 @@ export function Dashboard() {
             ))}
           </div>
         )}
-      </section>
+      </Reveal>
 
       {resumen.sinPagos.length > 0 && (
-        <section className="detail-block">
+        <Reveal as="section" className="detail-block">
           <div className="content-title-row content-title-row--sub">
             <h2>Sin pagos registrados</h2>
           </div>
@@ -110,7 +111,7 @@ export function Dashboard() {
               </Link>
             ))}
           </div>
-        </section>
+        </Reveal>
       )}
     </section>
   )

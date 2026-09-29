@@ -13,7 +13,7 @@ function buildService(alumnoExiste = true) {
   };
   const alumno = { id: 1, nombre: 'Juan' };
   const alumnosService = {
-    findOne: jest.fn((id: number) => {
+    findOne: jest.fn((_usuarioId: number, id: number) => {
       if (!alumnoExiste) {
         return Promise.reject(
           new NotFoundException(`No se encontró el alumno ${id}`),
@@ -33,7 +33,7 @@ describe('GraduacionesService', () => {
   describe('create', () => {
     it('crea una graduación cuando el alumno existe', async () => {
       const { service, repository } = buildService();
-      await service.create(1, {
+      await service.create(1, 1, {
         grado: 'Cinturón amarillo',
         fechaGraduacion: '2026-03-15',
       });
@@ -43,7 +43,7 @@ describe('GraduacionesService', () => {
     it('rechaza si el alumno no existe', async () => {
       const { service } = buildService(false);
       await expect(
-        service.create(999, {
+        service.create(1, 999, {
           grado: 'Cinturón amarillo',
           fechaGraduacion: '2026-03-15',
         }),
@@ -54,7 +54,7 @@ describe('GraduacionesService', () => {
   describe('findAllByAlumno', () => {
     it('lanza 404 si el alumno no existe', async () => {
       const { service } = buildService(false);
-      await expect(service.findAllByAlumno(999)).rejects.toThrow(
+      await expect(service.findAllByAlumno(1, 999)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -62,7 +62,7 @@ describe('GraduacionesService', () => {
     it('consulta ordenado por fecha descendente', async () => {
       const { service, repository } = buildService();
       repository.find.mockResolvedValue([]);
-      await service.findAllByAlumno(1);
+      await service.findAllByAlumno(1, 1);
       expect(repository.find).toHaveBeenCalledWith({
         where: { alumno: { id: 1 } },
         order: { fechaGraduacion: 'DESC' },
@@ -74,15 +74,15 @@ describe('GraduacionesService', () => {
     it('lanza 404 si no existe', async () => {
       const { service, repository } = buildService();
       repository.findOne.mockResolvedValue(null);
-      await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(1, 999)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('remove', () => {
     it('lanza 404 si no afectó ninguna fila', async () => {
       const { service, repository } = buildService();
-      repository.delete.mockResolvedValue({ affected: 0 });
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+      repository.findOne.mockResolvedValue(null);
+      await expect(service.remove(1, 999)).rejects.toThrow(NotFoundException);
     });
   });
 });

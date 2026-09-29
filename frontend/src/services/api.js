@@ -45,6 +45,7 @@ async function request(path, options = {}, requiresAuth = true) {
 
 export const api = {
   login: (credentials) => request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }, false),
+  registro: (data) => request('/auth/registro', { method: 'POST', body: JSON.stringify(data) }, false),
 
   getDashboard: () => request('/dashboard/resumen'),
 

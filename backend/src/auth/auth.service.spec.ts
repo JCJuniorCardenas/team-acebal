@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 // acá (usamos un mock de JwtService de todos modos), así que se reemplaza
 // por un stub vacío para evitar el error de carga.
 jest.mock('@nestjs/jwt', () => ({ JwtService: class {} }));
+jest.mock('@nestjs/config', () => ({ ConfigService: class {} }));
 jest.mock('bcrypt');
 
 function buildQueryBuilder(usuario: unknown) {
@@ -28,8 +29,15 @@ function buildService(usuarioEncontrado: unknown = null) {
     ),
   };
   const jwt = { signAsync: jest.fn().mockResolvedValue('token-falso') };
-  const service = new AuthService(repository as never, jwt as never);
-  return { service, repository, jwt };
+  const config = { get: jest.fn((_key: string, fallback?: unknown) => fallback) };
+  const emailService = { enviarVerificacion: jest.fn().mockResolvedValue(undefined) };
+  const service = new AuthService(
+    repository as never,
+    jwt as never,
+    config as never,
+    emailService as never,
+  );
+  return { service, repository, jwt, config, emailService };
 }
 
 describe('AuthService', () => {
@@ -60,6 +68,7 @@ describe('AuthService', () => {
         id: 1,
         email: 'admin@test.com',
         password: 'hash',
+        emailVerificado: true,
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       const result = await service.login({
@@ -83,6 +92,7 @@ describe('AuthService', () => {
       expect(repository.create).toHaveBeenCalledWith({
         email: 'admin@test.com',
         password: 'hash-nuevo',
+        emailVerificado: true,
       });
     });
 

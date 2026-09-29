@@ -12,18 +12,24 @@ export class AlumnosService {
     private readonly alumnosRepository: Repository<Alumno>,
   ) {}
 
-  create(createAlumnoDto: CreateAlumnoDto): Promise<Alumno> {
-    const alumno = this.alumnosRepository.create(createAlumnoDto);
+  create(usuarioId: number, createAlumnoDto: CreateAlumnoDto): Promise<Alumno> {
+    const alumno = this.alumnosRepository.create({
+      ...createAlumnoDto,
+      usuario: { id: usuarioId },
+    });
     return this.alumnosRepository.save(alumno);
   }
 
-  findAll(): Promise<Alumno[]> {
-    return this.alumnosRepository.find({ order: { nombre: 'ASC' } });
+  findAll(usuarioId: number): Promise<Alumno[]> {
+    return this.alumnosRepository.find({
+      where: { usuario: { id: usuarioId } },
+      order: { nombre: 'ASC' },
+    });
   }
 
-  async findOne(id: number): Promise<Alumno> {
+  async findOne(usuarioId: number, id: number): Promise<Alumno> {
     const alumno = await this.alumnosRepository.findOne({
-      where: { id },
+      where: { id, usuario: { id: usuarioId } },
       relations: { pagos: true, graduaciones: true },
     });
     if (!alumno) {
@@ -32,14 +38,21 @@ export class AlumnosService {
     return alumno;
   }
 
-  async update(id: number, updateAlumnoDto: UpdateAlumnoDto): Promise<Alumno> {
-    const alumno = await this.findOne(id);
+  async update(
+    usuarioId: number,
+    id: number,
+    updateAlumnoDto: UpdateAlumnoDto,
+  ): Promise<Alumno> {
+    const alumno = await this.findOne(usuarioId, id);
     Object.assign(alumno, updateAlumnoDto);
     return this.alumnosRepository.save(alumno);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.alumnosRepository.delete(id);
+  async remove(usuarioId: number, id: number): Promise<void> {
+    const result = await this.alumnosRepository.delete({
+      id,
+      usuario: { id: usuarioId },
+    });
     if (!result.affected) {
       throw new NotFoundException(`No se encontró el alumno ${id}`);
     }

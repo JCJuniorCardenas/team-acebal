@@ -34,7 +34,7 @@ describe('DashboardService', () => {
       ],
     });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     expect(resumen.vencidos).toHaveLength(1);
     expect(resumen.vencidos[0]).toMatchObject({ alumnoId: 1, diasVencido: 10 });
@@ -58,7 +58,7 @@ describe('DashboardService', () => {
       ],
     });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     expect(resumen.vencidos).toHaveLength(0);
     expect(resumen.proximosAVencer).toHaveLength(1);
@@ -83,7 +83,7 @@ describe('DashboardService', () => {
       ],
     });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     expect(resumen.vencidos).toHaveLength(0);
     expect(resumen.proximosAVencer).toHaveLength(0);
@@ -93,7 +93,7 @@ describe('DashboardService', () => {
     const alumno = { id: 4, nombre: 'Marina', apellido: 'Ruiz' };
     const { service } = buildService({ alumnos: [alumno], pagos: [] });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     expect(resumen.sinPagos).toEqual([
       { alumnoId: 4, nombre: 'Marina', apellido: 'Ruiz' },
@@ -123,7 +123,7 @@ describe('DashboardService', () => {
       ],
     });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     // El pago viejo ya estaría vencido, pero el vigente es el más reciente y no lo está.
     expect(resumen.vencidos).toHaveLength(0);
@@ -153,7 +153,7 @@ describe('DashboardService', () => {
       ],
     });
 
-    const resumen = await service.resumen();
+    const resumen = await service.resumen(1);
 
     expect(resumen.recaudadoMes).toBe(5000);
   });
