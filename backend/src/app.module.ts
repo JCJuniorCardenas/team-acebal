@@ -7,6 +7,7 @@ import { AlumnosModule } from './alumnos/alumnos.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { GraduacionesModule } from './graduaciones/graduaciones.module';
+import { HealthModule } from './health/health.module';
 import { PagosModule } from './pagos/pagos.module';
 
 @Module({
@@ -35,6 +36,7 @@ import { PagosModule } from './pagos/pagos.module';
     PagosModule,
     GraduacionesModule,
     DashboardModule,
+    HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
