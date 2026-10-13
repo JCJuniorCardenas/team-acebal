@@ -11,7 +11,17 @@ async function bootstrap() {
   // El esquema ya no usa synchronize en ningún entorno: las migraciones
   // corren siempre al arrancar, incluso en desarrollo.
   try {
-    await dataSource.initialize();
+    // Neon puede estar suspendida: se reintenta la primera conexión.
+    for (let intento = 1; ; intento++) {
+      try {
+        await dataSource.initialize();
+        break;
+      } catch (error) {
+        if (intento >= 4) throw error;
+        logger.warn(`Conexión a la base fallida (intento ${intento}), reintentando...`);
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
     const migrations = await dataSource.runMigrations();
     logger.log(`Migraciones aplicadas: ${migrations.length}`);
   } catch (error) {
